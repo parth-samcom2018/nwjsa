@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/grid_cell_height_large"
+    android:padding="@dimen/small_pad"
+    android:background="@drawable/textshape"
+    android:layout_margin="10dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="top"
+        android:gravity="center"
+        android:id="@+id/linear_main">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="@dimen/user_image_width"
+            android:layout_height="@dimen/user_image_width"
+            android:id="@+id/imageView"
+            android:src="@drawable/splashlogo"
+            app:civ_border_width="0dp"
+            android:layout_margin="5dp"
+            app:civ_border_color="#FF000000"
+            />
+
+
+        <TextView
+            android:layout_width="@dimen/user_image_width"
+            android:layout_height="@dimen/user_image_width"
+            android:id="@+id/usernameTV"
+            style="@style/textview_small"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="Rugby National Now I have A really long adn big name" />
+    </LinearLayout>
+
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:id="@+id/speach_image"
+        android:layout_toRightOf="@id/linear_main"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_alignEnd="@id/speach_image"
+        android:layout_alignStart="@id/speach_image"
+        android:layout_alignBottom="@id/speach_image"
+        android:layout_alignTop="@id/speach_image"
+        android:orientation="vertical"
+        android:weightSum="3"
+        android:layout_margin="@dimen/small_pad"
+        android:layout_alignRight="@id/speach_image"
+        android:layout_alignLeft="@id/speach_image">
+
+        <!-- first Row-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/flag_button_width"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/firstTV"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="First Row of text"
+                style="@style/textview_small"
+                android:singleLine="true"
+                android:gravity="center_vertical" />
+
+            <Button
+                android:id="@+id/flagButton"
+                android:layout_width="@dimen/flag_button_width"
+                android:layout_height="@dimen/flag_button_width"
+                android:background="@drawable/flag"
+                android:visibility="gone"
+                />
+
+        </LinearLayout>
+
+        <!-- Second Row -->
+        <TextView
+            android:id="@+id/secondTV"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:text="Second row of text"
+            style="@style/textview_normal"
+            android:singleLine="false"
+            android:gravity="center_vertical"
+            android:layout_weight="3"/>
+
+        <!-- Third Row -->
+        <TextView
+            android:id="@+id/thirdTV"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/flag_button_width"
+            android:text="Third row of text"
+            style="@style/textview_small"
+            android:visibility="visible"
+            android:singleLine="true"
+            android:gravity="center_vertical" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>
