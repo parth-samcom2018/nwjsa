@@ -34,7 +34,10 @@
             style="@style/textview_small"
             android:gravity="center"
             android:maxLines="2"
-            android:text="Rugby National Now I have A really long adn big name" />
+            android:text="Rugby National Now I have A really long adn big name"
+            android:textSize="12sp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:fontFamily="@font/lato_regular"/>
     </LinearLayout>
 
 
@@ -73,7 +76,10 @@
                 android:text="First Row of text"
                 style="@style/textview_small"
                 android:singleLine="true"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:fontFamily="@font/lato_regular"/>
 
             <Button
                 android:id="@+id/flagButton"
@@ -94,7 +100,10 @@
             style="@style/textview_normal"
             android:singleLine="false"
             android:gravity="center_vertical"
-            android:layout_weight="3"/>
+            android:layout_weight="3"
+            android:textSize="14sp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:fontFamily="@font/lato_regular"/>
 
         <!-- Third Row -->
         <TextView
@@ -105,7 +114,10 @@
             style="@style/textview_small"
             android:visibility="visible"
             android:singleLine="true"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:fontFamily="@font/lato_regular"/>
 
 
     </LinearLayout>

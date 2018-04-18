@@ -1,5 +1,8 @@
 package com.hq.nwjsahq.api;
 
+import com.hq.nwjsahq.models.Article;
+import com.hq.nwjsahq.models.ArticleComment;
+import com.hq.nwjsahq.models.ArticleResponse;
 import com.hq.nwjsahq.models.ClubResponse;
 import com.hq.nwjsahq.models.Event;
 import com.hq.nwjsahq.models.EventResponse;
@@ -134,6 +137,25 @@ public interface API {
                                   @Field("Comment") String comment,
                                   Callback<Response> callback);
 
+    //new api v2
+    @GET("/apiv2/articles/get/{groupID}")
+    public void getGroupArticlesnew(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<ArticleResponse> response);
+
+    //new api v2
+    @GET("/apiv2/Articles/{articleID}")
+    public void getArticles(@Header("Authorization") String auth,
+                            @Path("articleID") int articleID,
+                            Callback<Article> response);
+
+    //new api v2
+    @FormUrlEncoded
+    @POST("/apiv2/articles/Comment/{groupID}/{articleID}")
+    public void postArticleComments(@Header("Authorization") String auth,
+                                    @Path("groupID") int  groupID,
+                                    @Path("articleID") int articleID,
+                                    @Field("ArticleCommentDescription") String comment,
+                                    Callback<ArticleComment> callback);
+
 
     @FormUrlEncoded
     @POST("/apiv2/media/album")
@@ -223,11 +245,14 @@ public interface API {
                                   @Part("image") TypedFile file,
                                   Callback<Response> response);
 
+    //older api
+    @GET("/api/media/get/{groupID}")
+    public void getGroupMediaAlbums(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<List<MediaAlbum>> response);
+
+
     //new api v2
     @GET("/apiv2/media/get/{groupID}")
     public void getGroupingMediaAlbums(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<MediaAlbumResponse> response);
-
-
 
     //new api v2
     @GET("/apiv2/document/get/{groupID}")

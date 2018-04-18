@@ -104,8 +104,8 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".GroupVC"
-            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".WebVC"

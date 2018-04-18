@@ -28,7 +28,7 @@ public class RegistrationIntentService extends IntentService {
 
         Log.d("hq","My service on handle intent");
 
-        /*try {
+        try {
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
@@ -43,7 +43,7 @@ public class RegistrationIntentService extends IntentService {
         } catch (Exception e) {
             Log.d("hq","gcm registration exception");
             e.printStackTrace();
-        }*/
+        }
 
     }
 

@@ -10,10 +10,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +36,8 @@ public class GroupVC extends BaseVC {
     public static Ladders ladder;
     public static MediaAlbum mediaAlbum;
 
-    private TextView tv_grp_title,tv_edit;
+    private ImageView iv;
+    private TextView mTitle,tvend,tv_left,tv_edit,tv_heading;
     private LinearLayout ll_back,ll_edit;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -43,12 +46,13 @@ public class GroupVC extends BaseVC {
 
     private NoticeBoardVCN noticeBoardVCN;
     private MediaVC mediaVC;
+    private ArticlesVC articlesVC;
     private FixturesVC fixturesVC;
     private LaddersVC laddersVC;
     private DocumentsVC documentsVC;
     public Folder rootFolder = null;
 
-    private String[] titles = {"Notification", "Media", "Fixtures", "Ladders", "Documents"};
+    private String[] titles = {"Notification", "Media", "Articles", "Fixtures", "Ladders", "Documents"};
 
 
     @Override
@@ -58,30 +62,28 @@ public class GroupVC extends BaseVC {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             setContentView(R.layout.activity_group_vc); //Call the EVENT layout cause it's the same
 
+            Toolbar toolbar = findViewById(R.id.toolbar_top);
+            mTitle = toolbar.findViewById(R.id.toolbar_title);
+            tv_heading = findViewById(R.id.toolbar_heading);
+            iv = findViewById(R.id.iv_logo);
 
-            mSectionsPagerAdapter = new SectionsPagerAdapter(this.getSupportFragmentManager());
-
-            tv_grp_title = findViewById(R.id.group_title);
-            tv_grp_title.setText(group.groupName);
-
-            tv_edit = findViewById(R.id.tv_edit);
-
+            tvend = toolbar.findViewById(R.id.tv_end);
+            tv_left = toolbar.findViewById(R.id.tv_left);
             ll_back = findViewById(R.id.ll_back);
-            ll_edit = findViewById(R.id.ll_edit);
-
-            ll_edit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    inviteUserAction();
-                }
-            });
 
             ll_back.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    onBackPressed();
+                    finish();
                 }
             });
+
+            tv_heading.setText(group.groupName);
+            setSupportActionBar(toolbar);
+
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+            mSectionsPagerAdapter = new SectionsPagerAdapter(this.getSupportFragmentManager());
 
             // Set up the ViewPager with the sections adapter.
             mViewPager = findViewById(R.id.grp_view_pager);
@@ -102,40 +104,28 @@ public class GroupVC extends BaseVC {
                         case 0:
 
                             noticeBoardVCN.loadIfUnloaded();
-                            ll_edit.setVisibility(View.VISIBLE);
-                            tv_edit.setText("USER +");
-                            ll_edit.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    inviteUserAction();
-                                }
-                            });
+
                             break;
                         case 1:
-
                             mediaVC.loadIfUnloaded();
-                            ll_edit.setVisibility(View.VISIBLE);
-                            tv_edit.setText("CREATE ALBUM +");
-                            ll_edit.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    createAlbumAction();
-                                }
-                            });
-                            break;
-                        case 2:
-                            fixturesVC.loadIfUnloaded();
-                            ll_edit.setVisibility(View.GONE);
-                            break;
-                        case 3:
-                            laddersVC.loadIfUnloaded();
-                            ll_edit.setVisibility(View.GONE);
+
                             break;
 
+                        case 2:
+                            articlesVC.loadIfUnloaded();
+
+                            break;
+
+                        case 3:
+                            fixturesVC.loadIfUnloaded();
+                            break;
                         case 4:
+                            laddersVC.loadIfUnloaded();
+
+                            break;
+
+                        case 5:
                             documentsVC.loadIfUnloaded();
-                            ll_edit.setVisibility(View.VISIBLE);
-                            tv_edit.setText("");
                             break;
                     }
 
@@ -161,6 +151,9 @@ public class GroupVC extends BaseVC {
 
             this.mediaVC = (MediaVC) MediaVC.instantiate(this, MediaVC.class.getName());
             this.mediaVC.group = group;
+
+            this.articlesVC = (ArticlesVC) ArticlesVC.instantiate(this, ArticlesVC.class.getName());
+            this.articlesVC.group = group;
 
             this.fixturesVC = (FixturesVC) FixturesVC.instantiate(this, FixturesVC.class.getName());
             this.fixturesVC.group = group;
@@ -384,15 +377,16 @@ public class GroupVC extends BaseVC {
 
             if (position == 0) return noticeBoardVCN;
             else if (position == 1) return mediaVC;
-            else if (position == 2) return fixturesVC;
-            else if (position ==3) return laddersVC;
+            else if (position == 2) return articlesVC;
+            else if (position == 3) return fixturesVC;
+            else if (position ==4) return laddersVC;
             else return documentsVC;
         }
 
         @Override
         public int getCount() {
             // tab count
-            return 5;
+            return 6;
         }
 
         @Override

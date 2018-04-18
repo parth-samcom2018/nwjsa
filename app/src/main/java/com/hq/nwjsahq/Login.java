@@ -268,8 +268,6 @@ public class Login extends BaseVC {
             final ProgressDialog pd = DM.getPD(this,"Logging In...");
             pd.show();
 
-
-
             DM.getApi().login("password", email, password, new Callback<Token>() {
                 @Override
                 public void success(Token login, Response response) {

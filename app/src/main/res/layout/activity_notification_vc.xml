@@ -138,7 +138,10 @@
             android:singleLine="true"
             android:gravity="center_vertical"
             android:layout_marginLeft="10dp"
-            android:textColor="@color/colorPrimary"/>
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:fontFamily="@font/lato_regular"/>
 
         <TextView
             android:id="@+id/secondTV"
@@ -150,7 +153,10 @@
             style="@style/textview_normal"
             android:layout_marginLeft="10dp"
             android:singleLine="true"
-            android:gravity="center_vertical" />
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:fontFamily="@font/lato_regular"/>
 
     </RelativeLayout>
 
@@ -163,8 +169,9 @@
         style="@style/textview_normal"
         android:gravity="center_vertical"
         android:padding="@dimen/med_pad"
+        android:textSize="14sp"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:fontFamily="@font/lato_regular"
-        android:textSize="12sp"
         android:linksClickable="true"/>
 
 

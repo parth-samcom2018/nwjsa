@@ -488,7 +488,7 @@ public class Registration extends BaseVC{
                                 int selectedItem = listView.getCheckedItemPosition();
                                 //Toast.makeText(Registration.this, "" + selectedItem, Toast.LENGTH_SHORT).show();
                                 ClubNames e = clubNames.get(selectedItem);
-                                String name = "Baseball NSW";
+                                String name = "NWJSA HQ";
 
                                 registerModel.groupId = e.groupId;
                                 registerModel.groupName = name;

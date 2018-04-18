@@ -28,7 +28,6 @@
                 app:civ_border_color="#FF000000"
                 />
 
-
             <TextView
                 android:layout_width="@dimen/user_image_width"
                 android:layout_height="@dimen/user_image_width"
@@ -36,6 +35,9 @@
                 style="@style/textview_small"
                 android:gravity="center"
                 android:maxLines="2"
+                android:textSize="12sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:fontFamily="@font/lato_regular"
                 android:text="Rugby National Now I have A really long adn big name" />
         </LinearLayout>
 
@@ -62,7 +64,10 @@
                     style="@style/textview_small"
                     android:layout_marginLeft="15dp"
                     android:singleLine="true"
-                    android:gravity="center_vertical" />
+                    android:gravity="center_vertical"
+                    android:textSize="12sp"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:fontFamily="@font/lato_regular"/>
 
                 <Button
                     android:id="@+id/flagButton"
@@ -86,7 +91,7 @@
                 <!-- Second Row -->
                 <TextView
                     android:id="@+id/secondTV"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Second row of text"
                     style="@style/textview_normal"
@@ -94,17 +99,21 @@
                     android:singleLine="false"
                     android:layout_marginLeft="10dp"
                     android:clickable="true"
-                    android:gravity="center_vertical" />
+                    android:gravity="center_vertical"
+                    android:textSize="16sp"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:fontFamily="@font/lato_regular"
+                    />
 
                 <TextView
-                    android:layout_weight="0.1"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=">"
                     android:textColor="@color/gray"
                     android:layout_toRightOf="@+id/bodyIV"
                     android:layout_gravity="center|right"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:layout_margin="5dp"
                     />
 
@@ -121,7 +130,10 @@
                 style="@style/textview_small"
                 android:singleLine="true"
                 android:gravity="bottom|left"
-                android:layout_gravity="bottom|left"/>
+                android:layout_gravity="bottom|left"
+                android:textSize="12sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:fontFamily="@font/lato_regular"/>
 
         </LinearLayout>
 

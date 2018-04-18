@@ -17,6 +17,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,11 +30,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -50,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,6 +83,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
     private ListView listView;
     private ArrayAdapter listAdapter;
     private ImageView emptyIV;
+    private ProgressDialog pd;
     File photoFile = null;
 
     public MediaVC() {
@@ -189,11 +195,13 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                         });
                     }
                 }
-
                 TextView firstTV = convertView.findViewById(R.id.firstTV);
                 firstTV.setText(album.name+" \n" +album.mediaModels.size()+" photos");
                 firstTV.setTextColor(getResources().getColor(R.color.white));
-
+                firstTV.setTypeface(firstTV.getTypeface(), Typeface.BOLD);
+                if(album.mediaModels.size()==0){
+                    firstTV.setTextColor(getResources().getColor(R.color.black));
+                }
                 Button flagButton = convertView.findViewById(R.id.flagButton);
                 flagButton.setOnClickListener(DM.getFlagOnClickListener(MediaVC.this.getActivity()));
 
@@ -276,11 +284,82 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-
         inflater.inflate(R.menu.create_album_menu, menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId() == R.id.createAlbum) this.createAlbumAction();
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createAlbumAction() {
+
+        final AlertDialog.Builder alert = new AlertDialog.Builder(MediaVC.this.getActivity());
+
+        LinearLayout lila1 = new LinearLayout(MediaVC.this.getActivity());
+        lila1.setOrientation(LinearLayout.VERTICAL);
+        final EditText nameET = new EditText(MediaVC.this.getActivity());
+        nameET.setHint("Album Name");
+        final EditText descET = new EditText(MediaVC.this.getActivity());
+        descET.setVisibility(View.GONE);
+        descET.setHint("Album Description");
+        lila1.addView(nameET);
+        int pad = (int)getResources().getDimension(R.dimen.small_pad);
+        lila1.setPadding(pad,pad,pad,pad);
+        alert.setView(lila1);
+
+        alert.setTitle("Create Album");
+
+
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            public void onClick(final DialogInterface dialog, int whichButton) {
+                String name = nameET.getText().toString();
+
+                if(name.length() == 0 || name == null)
+                {
+                    Toast.makeText(MediaVC.this.getActivity(),"Enter a name",Toast.LENGTH_LONG).show();
+                    DM.hideKeyboard(MediaVC.this.getActivity());
+                    return;
+                }
+
+
+                pd = DM.getPD(MediaVC.this.getActivity(),"Loading Creating Album..");
+                pd.show();
+
+                DM.getApi().postMediaAlbum(DM.getAuthString(), name,  group.groupId, new Callback<Response>() {
+                    @Override
+                    public void success(Response response, Response response2) {
+                        Toast.makeText(MediaVC.this.getActivity(),"Album Created!",Toast.LENGTH_LONG).show();
+                        pd.dismiss();
+                        dialog.dismiss();
+                        DM.hideKeyboard(MediaVC.this.getActivity());
+
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        Toast.makeText(MediaVC.this.getActivity(),"Could not create album: "+error.getMessage(),Toast.LENGTH_LONG).show();
+                        pd.dismiss();
+                        dialog.dismiss();
+                        DM.hideKeyboard(MediaVC.this.getActivity());
+                    }
+                });
+
+            }
+        });
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DM.hideKeyboard(MediaVC.this.getActivity());
+                dialog.dismiss();
+            }
+        });
+
+        alert.show();
+    }
 
     private void cameraAction() {
 
@@ -624,10 +703,10 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
         pd.show();
 
 
-        if(group != null) DM.getApi().getGroupingMediaAlbums(DM.getAuthString(), group.groupId, new Callback<MediaAlbumResponse>() {
+        if(group != null) DM.getApi().getGroupMediaAlbums(DM.getAuthString(), group.groupId, new Callback<List<MediaAlbum>>() {
             @Override
-            public void success(MediaAlbumResponse mediaAlbums, Response response) {
-                albums = mediaAlbums.getData();
+            public void success(List<MediaAlbum> mediaAlbums, Response response) {
+                albums = mediaAlbums;
                 for(MediaAlbum a : albums)
                 {
                     a.sortMediaAlbumsByDate();
@@ -637,7 +716,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                 refreshLayout.setRefreshing(false);
                 pd.dismiss();
 
-                if(mediaAlbums.getData().size()==0) emptyIV.setVisibility(View.VISIBLE);
+                if(mediaAlbums.size()==0) emptyIV.setVisibility(View.VISIBLE);
                 else emptyIV.setVisibility(View.GONE);
 
             }
@@ -649,7 +728,6 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
             }
         });
-
     }
 
     private class RoundedCornersTransform implements Transformation {

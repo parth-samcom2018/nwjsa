@@ -35,6 +35,9 @@
                 style="@style/textview_small"
                 android:gravity="center"
                 android:maxLines="2"
+                android:textSize="12sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:fontFamily="@font/lato_regular"
                 android:text="Rugby National Now I have A really long adn big name" />
         </LinearLayout>
 
@@ -61,7 +64,10 @@
                     style="@style/textview_small"
                     android:layout_marginLeft="15dp"
                     android:singleLine="true"
-                    android:gravity="center_vertical" />
+                    android:gravity="center_vertical"
+                    android:textSize="12sp"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:fontFamily="@font/lato_regular"/>
 
                 <Button
                     android:id="@+id/flagButton"
@@ -91,7 +97,8 @@
                     android:layout_height="150dp"
                     android:elevation="10dp"
                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/notice_shape">
+                    android:background="@drawable/notice_shape"
+                    android:layout_marginLeft="10dp">
 
                     <ImageView
                         android:id="@+id/bodyIV"
@@ -100,7 +107,6 @@
                         android:src="@drawable/logo_log_in"
                         android:scaleType="center"
                         android:adjustViewBounds="true"
-
                         />
 
                     <TextView
@@ -144,7 +150,10 @@
                 style="@style/textview_small"
                 android:singleLine="true"
                 android:gravity="bottom|left"
-                android:layout_gravity="bottom|left"/>
+                android:layout_gravity="bottom|left"
+                android:textSize="12sp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:fontFamily="@font/lato_regular"/>
 
         </LinearLayout>
 

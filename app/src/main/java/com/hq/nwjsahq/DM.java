@@ -30,7 +30,7 @@ import retrofit.converter.GsonConverter;
 
 public class DM {
 
-    public  static String APIROOT ="http://baseballnswapi.azurewebsites.net";
+    public  static String APIROOT ="http://nwjsaapi.azurewebsites.net";
 
     public static Member member;
 

@@ -61,6 +61,7 @@
             style="@style/textview_normal"
             android:fontFamily="@font/lato_regular"
             android:textStyle="bold"
+            android:textSize="13sp"
             android:lines="2"
             android:minLines="2"
             android:layout_marginLeft="10dp"
