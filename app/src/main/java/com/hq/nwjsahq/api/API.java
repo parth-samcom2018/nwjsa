@@ -89,6 +89,12 @@ public interface API {
     public void getMemberDetailing(@Header("Authorization") String auth,
                                    Callback<Profile> callback);
 
+    //older api
+    @GET("/api/Articles/{articleID}")
+    public void getArticle(@Header("Authorization") String auth,
+                           @Path("articleID") int articleID,
+                           Callback<Article> response);
+
     //older version
     @GET("/apiv2/events/all")      //here is the other url part.best way is to start using /
     public void getAllEvents(@Header("Authorization") String auth, Callback<EventResponse> response);
@@ -112,11 +118,6 @@ public interface API {
     public void putEvents(@Header("Authorization") String auth,
                           @Body Event eventModel,
                           Callback<Response> callback);
-
-    //older api version 1
-    @GET("/api/groupMembers/groups")      //here is the other url part.best way is to start using /
-    public void getAllGroups(@Header("Authorization") String auth, Callback<List<Group>> response);
-
 
     //new api v2
     @GET("/apiv2/groupMembers/groups")      //here is the other url part.best way is to start using /

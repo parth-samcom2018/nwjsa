@@ -1,15 +1,20 @@
 package com.hq.nwjsahq;
 
 import android.app.DatePickerDialog;
+import android.app.Service;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -38,8 +43,8 @@ public class EventFormVC extends BaseVC {
     private static final String TAG = "Location";
     //Model
     public static Event event;
+    private final int PLACE_PICKER_REQUEST = 1;
     private List<Group> userGroups = null;
-
     //VIEWS
     private EditText nameET;
     private Button startDate;
@@ -49,8 +54,7 @@ public class EventFormVC extends BaseVC {
     private Button location;
     private EditText notesET;
     private TextView tv_event_title;
-    private LinearLayout ll_back,ll_save;
-
+    private LinearLayout ll_back, ll_save;
     private int mYear, mMonth, mDay, mHour, mMinute;
 
     @Override
@@ -59,16 +63,13 @@ public class EventFormVC extends BaseVC {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         setContentView(R.layout.activity_event_form_sc);
 
-
-        if(event == null)
-        {
+        if (event == null) {
             event = new Event();
         }
 
-
         tv_event_title = findViewById(R.id.tv_event_title);
         tv_event_title.setText("Update Event");
-        if(event.eventName==null){
+        if (event.eventName == null) {
             tv_event_title.setText("New Event");
         }
 
@@ -98,7 +99,6 @@ public class EventFormVC extends BaseVC {
         location = findViewById(R.id.location);
         notesET = findViewById(R.id.notesET);
 
-
         final Calendar c = Calendar.getInstance();
         final int year = c.get(Calendar.YEAR);
         final int month = c.get(Calendar.MONTH);
@@ -113,19 +113,18 @@ public class EventFormVC extends BaseVC {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-                        if(event.eventStart == null)
-                        {
+                        if (event.eventStart == null) {
                             event.eventStart = new Date();
                         }
 
-                        event.eventStart.setYear(year -1900);//gregorian
+                        event.eventStart.setYear(year - 1900);//gregorian
                         event.eventStart.setMonth(monthOfYear);
                         event.eventStart.setDate(dayOfMonth);
 
-                        startDate.setText("Start Date: "+DM.getDateOnlyString(event.eventStart));
+                        startDate.setText("Start Date: " + DM.getDateOnlyString(event.eventStart));
 
                     }
-                },year,month,day);
+                }, year, month, day);
 
                 d.show();
             }
@@ -142,19 +141,16 @@ public class EventFormVC extends BaseVC {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-
-
-                        if(event.eventStart == null)
-                        {
+                        if (event.eventStart == null) {
                             event.eventStart = new Date();
                         }
 
                         event.eventStart.setHours(hourOfDay);
                         event.eventStart.setMinutes(minute);
-                        startTime.setText("Start Time: "+DM.getTimeOnlyString(event.eventStart));
+                        startTime.setText("Start Time: " + DM.getTimeOnlyString(event.eventStart));
 
                     }
-                },mHour, mMinute, false);
+                }, mHour, mMinute, false);
                 t.show();
 
 
@@ -170,19 +166,17 @@ public class EventFormVC extends BaseVC {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-                        if(event.eventEnd == null)
-                        {
-                            event. eventEnd = new Date();
+                        if (event.eventEnd == null) {
+                            event.eventEnd = new Date();
                         }
 
-
-                        event.eventEnd.setYear(year-1900);//gregorian
+                        event.eventEnd.setYear(year - 1900);//gregorian
                         event.eventEnd.setMonth(monthOfYear);
                         event.eventEnd.setDate(dayOfMonth);
 
-                        endDate.setText("End Date: "+DM.getDateOnlyString(event.eventEnd));
+                        endDate.setText("End Date: " + DM.getDateOnlyString(event.eventEnd));
                     }
-                },year,month,day);
+                }, year, month, day);
                 d.show();
             }
         });
@@ -198,18 +192,16 @@ public class EventFormVC extends BaseVC {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-                        if(event.eventEnd == null)
-                        {
-                            event. eventEnd = new Date();
+                        if (event.eventEnd == null) {
+                            event.eventEnd = new Date();
                         }
-
                         event.eventEnd.setHours(hourOfDay);
                         event.eventEnd.setMinutes(minute);
 
-                        endTime.setText("End Time: "+DM.getTimeOnlyString(event.eventEnd));
+                        endTime.setText("End Time: " + DM.getTimeOnlyString(event.eventEnd));
 
                     }
-                },mHour, mMinute, false);
+                }, mHour, mMinute, false);
                 t.show();
             }
         });
@@ -223,21 +215,6 @@ public class EventFormVC extends BaseVC {
             }
         });
 
-
-        //Load user groups secretly in background
-        /*DM.getApi().getAllGroups(DM.getAuthString(), new Callback<List<Group>>() {
-            @Override
-            public void success(List<Group> gs, Response response) {
-                userGroups = gs;
-
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-
-            }
-        });*/
         DM.getApi().getAllGrouping(DM.getAuthString(), new Callback<GroupResponse>() {
             @Override
             public void success(GroupResponse gs, Response response) {
@@ -251,16 +228,11 @@ public class EventFormVC extends BaseVC {
             }
         });
 
-
         this.modelToView();
-
 
     }
 
-
-    private final int PLACE_PICKER_REQUEST = 1;
-    private void launchLocationPicker()
-    {
+    private void launchLocationPicker() {
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
@@ -269,7 +241,7 @@ public class EventFormVC extends BaseVC {
             startActivityForResult(i, PLACE_PICKER_REQUEST);
 
         } catch (Exception e) {
-            Toast.makeText(this,"Could not load map picker, try again later", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Could not load map picker, try again later", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
@@ -285,75 +257,75 @@ public class EventFormVC extends BaseVC {
                 event.latitude = place.getLatLng().latitude;
                 event.longitude = place.getLatLng().longitude;
 
-                location.setText("Location: "+event.location);
+                location.setText("Location: " + event.location);
             }
         }
     }
 
-    private void modelToView()
-    {
-        if(event.eventId == 0){
+    private void modelToView() {
+        if (event.eventId == 0) {
             setTitle("Create Event");
             startDate.setText("Select Start Date");
             startTime.setText("Select Start Time");
             endDate.setText("Select End Date");
             endTime.setText("Select End Time");
             location.setText("Choose Location");
-        }
-        else{
+        } else {
             setTitle("Save Event");
             nameET.setText(event.eventName);
 
-            startDate.setText("Start Date: "+DM.getDateOnlyString(event.eventStart));
-            startTime.setText("Start Time: "+DM.getTimeOnlyString(event.eventStart));
-            endDate.setText("End Date: "+DM.getDateOnlyString(event.eventEnd));
-            endTime.setText("End Time: "+DM.getTimeOnlyString(event.eventEnd));
-
+            startDate.setText("Start Date: " + DM.getDateOnlyString(event.eventStart));
+            startTime.setText("Start Time: " + DM.getTimeOnlyString(event.eventStart));
+            endDate.setText("End Date: " + DM.getDateOnlyString(event.eventEnd));
+            endTime.setText("End Time: " + DM.getTimeOnlyString(event.eventEnd));
 
             notesET.setText(event.notes);
-            location.setText("Location: "+event.location);
+            location.setText("Location: " + event.location);
         }
     }
 
-    private void saveAction()
-    {
+    private void saveAction() {
 
         //view to model
         event.eventName = nameET.getText().toString();
         event.notes = notesET.getText().toString();
         event.AddNotificationToGroupHome = true;
 
-        if(event.eventName.equals(""))
-        {
-            Toast.makeText(this,"Please enter a name",Toast.LENGTH_LONG).show();
+        if (event.eventName.equals("")) {
+            Toast.makeText(this, "Please enter a name", Toast.LENGTH_LONG).show();
             return;
         }
 
-        if(event.eventStart ==null ||event.eventEnd==null)
-        {
-            Toast.makeText(this,"Please select dates",Toast.LENGTH_LONG).show();
-            return;
-        }
-
-
-        if(event.longitude == 0 && event.latitude == 0)
-        {
-            Toast.makeText(this,"Please select a location with valid coordinates",Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if(userGroups == null || userGroups.size() == 0)
-        {
-            Toast.makeText(this,"User has no group to save to! join a group or try again alter",Toast.LENGTH_LONG).show();
+        if (event.eventStart == null || event.eventEnd == null) {
+            Toast.makeText(this, "Please select dates", Toast.LENGTH_LONG).show();
             return;
         }
 
 
-        Log.d("hq", "Start: "+DM.getDateOnlyString(event.eventStart) +"-" + DM.getTimeOnlyString(event.eventStart));
+        if (event.longitude == 0 && event.latitude == 0) {
+            Toast.makeText(this, "Please select a location with valid coordinates", Toast.LENGTH_LONG).show();
+            return;
+        }
 
+        if (userGroups == null || userGroups.size() == 0) {
+            Toast.makeText(this, "User has no group to save to! join a group or try again alter", Toast.LENGTH_LONG).show();
+            return;
+        }
 
+        if (event.notes.equals("") || notesET.getText().toString().isEmpty()) {
+            Toast toast  = Toast.makeText(this, "Notes are empty!!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER,0,0);
+            toast.show();
+            notesET.requestFocus();
+            notesET.setFocusable(true);
+            InputMethodManager imm = (InputMethodManager)this.getSystemService(Service.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(notesET, 0);
+            return;
+        }
 
-        if(event.eventId == 0) {
+        Log.d("hq", "Start: " + DM.getDateOnlyString(event.eventStart) + "-" + DM.getTimeOnlyString(event.eventStart));
+
+        if (event.eventId == 0) {
             SelectGroupDialog sgd = new SelectGroupDialog(this, userGroups, new SelectGroupDialog.Protocol() {
                 @Override
                 public void didSelectGroup(Group group) {
@@ -363,34 +335,15 @@ public class EventFormVC extends BaseVC {
                 }
             });
             sgd.show();
-        }
-        else //UPDATE
+        } else //UPDATE
         {
             //family ID already defined (hopefully anyway)
             networkPut();
         }
 
-
-
-
     }
 
-    private void networkPut()
-    {
-        /*DM.getApi().putEvent(DM.getAuthString(), event, new Callback<Response>() {
-            @Override
-            public void success(Response response, Response response2) {
-                Toast.makeText(EventFormVC.this,"Event Updated!",Toast.LENGTH_LONG).show();
-                EventsVC.oneShotRefresh = true; //reload events...
-                EventFormVC.this.finish();
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-                Toast.makeText(EventFormVC.this,"Could not update event: "+error.getMessage(),Toast.LENGTH_LONG).show();
-            }
-        });*/
+    private void networkPut() {
 
         DM.getApi().putEvents(DM.getAuthString(), event, new Callback<Response>() {
             @Override
@@ -404,31 +357,27 @@ public class EventFormVC extends BaseVC {
 
             @Override
             public void failure(RetrofitError error) {
-                Toast.makeText(EventFormVC.this, "Could not update event: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EventFormVC.this, "Could not update event: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void networkPost()
-    {
+    private void networkPost() {
 
         DM.getApi().postEvents(DM.getAuthString(), event, new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
-                Toast.makeText(EventFormVC.this,"Event Created!",Toast.LENGTH_LONG).show();
+                Toast.makeText(EventFormVC.this, "Event Created!", Toast.LENGTH_LONG).show();
                 EventsFragment.oneShotRefresh = true; //reload events...
                 EventFormVC.this.finish();
-
-
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d("hq",error.getMessage());
-                Toast.makeText(EventFormVC.this,"Could not create event: "+error.getMessage(),Toast.LENGTH_LONG).show();
+                Log.d("hq", error.getMessage());
+                Toast.makeText(EventFormVC.this, "Could not create event: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
     }
 
     @Override
@@ -436,7 +385,6 @@ public class EventFormVC extends BaseVC {
         event = null;
         super.onDestroy();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -449,8 +397,7 @@ public class EventFormVC extends BaseVC {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == R.id.save)this.saveAction();
-
+        if (item.getItemId() == R.id.save) this.saveAction();
         return super.onOptionsItemSelected(item);
     }
 }

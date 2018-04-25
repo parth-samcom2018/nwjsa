@@ -1,6 +1,5 @@
 package com.hq.nwjsahq;
 
-import android.*;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -54,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,29 +66,38 @@ import retrofit.mime.TypedFile;
 
 public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
-    static final int REQUEST_TAKE_PHOTO = 1;
-    static final int REQUEST_PICK_IMAGE = 2;
-
-    boolean isSelected;
-
     public static final int MY_PERMISSIONS_REQUEST_CAMERA = 100;
     public static final String ALLOW_KEY = "ALLOWED";
     public static final String CAMERA_PREF = "camera_pref";
+    static final int REQUEST_TAKE_PHOTO = 1;
+    static final int REQUEST_PICK_IMAGE = 2;
     public Group group;
+    boolean isSelected;
+    File photoFile = null;
+    String mCurrentPhotoPath;
     private List<MediaAlbum> albums = new Vector<MediaAlbum>();
-
     private SwipeRefreshLayout refreshLayout;
     private ListView listView;
     private ArrayAdapter listAdapter;
     private ImageView emptyIV;
     private ProgressDialog pd;
-    File photoFile = null;
+    private Uri capturedImageUri;
+    private String imgDecodableString;
+    private Bitmap bitmapToCrop;
+    private boolean initialLoaded = false;
 
     public MediaVC() {
         // Required empty public constructor
     }
 
-
+    public static void saveToPreferences(Context context, String key,
+                                         Boolean allowed) {
+        SharedPreferences myPrefs = context.getSharedPreferences
+                (CAMERA_PREF, Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = myPrefs.edit();
+        prefsEditor.putBoolean(key, allowed);
+        prefsEditor.commit();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -114,8 +121,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
-                if(convertView == null)
-                {
+                if (convertView == null) {
                     convertView = LayoutInflater.from(MediaVC.this.getActivity()).inflate(R.layout.media_cell, parent, false);
 
                 }
@@ -130,7 +136,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
                 final ImageView showiv = convertView.findViewById(R.id.iv);
 
-                if (showiv!=null || album.mediaModels!=null){
+                if (showiv != null || album.mediaModels != null) {
                     Picasso.Builder builder = new Picasso.Builder(MediaVC.this.getActivity());
                     builder.listener(new Picasso.Listener() {
                         @Override
@@ -141,12 +147,11 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                     });
                     Picasso p = builder.build();
 
-                    if (showiv==null || album.mediaModels==null){
+                    if (showiv == null || album.mediaModels == null) {
                         showiv.setImageResource(R.drawable.icon);
                         showiv.setClickable(false);
 
-                    }
-                    else {
+                    } else {
                         p.load(album.coverImage)//.networkPolicy(NetworkPolicy.NO_CACHE)
                                 .placeholder(R.drawable.icon).into(showiv);
 
@@ -181,12 +186,12 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                         showiv.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if (showiv==null || album.mediaModels==null || album.mediaModels.size()==0 || showiv.equals("0")){
+                                if (showiv == null || album.mediaModels == null || album.mediaModels.size() == 0 || showiv.equals("0")) {
                                     Toast.makeText(MediaVC.this.getActivity(), "This album is empty! It will fill up only when you select album while upload any photos!", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
 
-                                Log.d("hq","slider click!");
+                                Log.d("hq", "slider click!");
                                 MediaDetailVC.mediaAlbum = album;
                                 Intent i = new Intent(getActivity(), MediaDetailVC.class);
                                 startActivity(i);
@@ -196,10 +201,10 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                     }
                 }
                 TextView firstTV = convertView.findViewById(R.id.firstTV);
-                firstTV.setText(album.name+" \n" +album.mediaModels.size()+" photos");
+                firstTV.setText(album.name + " \n" + album.mediaModels.size() + " photos");
                 firstTV.setTextColor(getResources().getColor(R.color.white));
                 firstTV.setTypeface(firstTV.getTypeface(), Typeface.BOLD);
-                if(album.mediaModels.size()==0){
+                if (album.mediaModels.size() == 0) {
                     firstTV.setTextColor(getResources().getColor(R.color.black));
                 }
                 Button flagButton = convertView.findViewById(R.id.flagButton);
@@ -230,7 +235,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
             public void onClick(View v) {
 
 
-                if (checkpermission()==true){
+                if (checkpermission() == true) {
                     cameraAction();
                 }
                 checkpermission();
@@ -249,7 +254,6 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
         return v;
     }
 
-
     private boolean checkpermission() {
         int permissionSendMessage = ContextCompat.checkSelfPermission(MediaVC.this.getActivity(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -260,7 +264,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
         List<String> listPermissionsNeeded = new ArrayList<>();
 
-        if (permissionExternal != PackageManager.PERMISSION_GRANTED){
+        if (permissionExternal != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
         }
         if (locationPermission != PackageManager.PERMISSION_GRANTED) {
@@ -272,15 +276,12 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
 
         if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(MediaVC.this.getActivity(), listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),MY_PERMISSIONS_REQUEST_CAMERA);
+            ActivityCompat.requestPermissions(MediaVC.this.getActivity(), listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MY_PERMISSIONS_REQUEST_CAMERA);
             cameraAction();
             return false;
         }
         return true;
     }
-
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -290,7 +291,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == R.id.createAlbum) this.createAlbumAction();
+        if (item.getItemId() == R.id.createAlbum) this.createAlbumAction();
 
         return super.onOptionsItemSelected(item);
     }
@@ -307,8 +308,8 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
         descET.setVisibility(View.GONE);
         descET.setHint("Album Description");
         lila1.addView(nameET);
-        int pad = (int)getResources().getDimension(R.dimen.small_pad);
-        lila1.setPadding(pad,pad,pad,pad);
+        int pad = (int) getResources().getDimension(R.dimen.small_pad);
+        lila1.setPadding(pad, pad, pad, pad);
         alert.setView(lila1);
 
         alert.setTitle("Create Album");
@@ -318,21 +319,20 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
             public void onClick(final DialogInterface dialog, int whichButton) {
                 String name = nameET.getText().toString();
 
-                if(name.length() == 0 || name == null)
-                {
-                    Toast.makeText(MediaVC.this.getActivity(),"Enter a name",Toast.LENGTH_LONG).show();
+                if (name.length() == 0 || name == null) {
+                    Toast.makeText(MediaVC.this.getActivity(), "Enter a name", Toast.LENGTH_LONG).show();
                     DM.hideKeyboard(MediaVC.this.getActivity());
                     return;
                 }
 
 
-                pd = DM.getPD(MediaVC.this.getActivity(),"Loading Creating Album..");
+                pd = DM.getPD(MediaVC.this.getActivity(), "Loading Creating Album..");
                 pd.show();
 
-                DM.getApi().postMediaAlbum(DM.getAuthString(), name,  group.groupId, new Callback<Response>() {
+                DM.getApi().postMediaAlbum(DM.getAuthString(), name, group.groupId, new Callback<Response>() {
                     @Override
                     public void success(Response response, Response response2) {
-                        Toast.makeText(MediaVC.this.getActivity(),"Album Created!",Toast.LENGTH_LONG).show();
+                        Toast.makeText(MediaVC.this.getActivity(), "Album Created!", Toast.LENGTH_LONG).show();
                         pd.dismiss();
                         dialog.dismiss();
                         DM.hideKeyboard(MediaVC.this.getActivity());
@@ -341,7 +341,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
                     @Override
                     public void failure(RetrofitError error) {
-                        Toast.makeText(MediaVC.this.getActivity(),"Could not create album: "+error.getMessage(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(MediaVC.this.getActivity(), "Could not create album: " + error.getMessage(), Toast.LENGTH_LONG).show();
                         pd.dismiss();
                         dialog.dismiss();
                         DM.hideKeyboard(MediaVC.this.getActivity());
@@ -405,109 +405,14 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                     }
                 }
             }
-
         }
     }
 
-
-
-    public static void saveToPreferences(Context context, String key,
-                                         Boolean allowed) {
-        SharedPreferences myPrefs = context.getSharedPreferences
-                (CAMERA_PREF, Context.MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = myPrefs.edit();
-        prefsEditor.putBoolean(key, allowed);
-        prefsEditor.commit();
-    }
-
-
-
-    private void uploadAction()
-    {
+    private void uploadAction() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, REQUEST_PICK_IMAGE);
-    }
-
-    private Uri capturedImageUri;
-    String mCurrentPhotoPath;
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-
-        capturedImageUri = Uri.fromFile(image);
-        return image;
-    }
-
-    private String imgDecodableString;
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        Bitmap b = null;
-
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-            // Bundle extras = data.getExtras();
-            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-
-            Log.d("hipcook", "request take photo");
-            try {
-                b= MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(), capturedImageUri);
-                Log.d("hipcook", "I now have a photo bitmap:" + b.getWidth());
-                float scaleFactor = 640f/ b.getWidth();
-                b = DM.createScaledBitmap(b,scaleFactor);
-                Log.d("hipcook", "I now have a scaled photo bitmap:" + b.getWidth());
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d("hipcook", "bitmap exception");
-            }
-        }
-        else if (requestCode == REQUEST_PICK_IMAGE &&
-                resultCode == Activity.RESULT_OK &&
-                null != data) {
-            // Get the Image from data
-
-            Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
-            // Get the cursor
-            Cursor cursor = getActivity().getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-            cursor.moveToNext();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            imgDecodableString = cursor.getString(columnIndex);
-            cursor.close();
-
-            b = DM.decodeSampledBitmapFromFile(imgDecodableString, 640,640);
-            Log.d("hipcook", "I now have a bitmap:" + b.getWidth());
-
-
-
-        } else {
-            Toast.makeText(this.getActivity(), "You haven't picked Image", Toast.LENGTH_LONG).show();
-        }
-
-        //if found a bitmap do the crop fun
-        if(b != null)
-        {
-            CropActivity.del = this;
-            bitmapToCrop = b;
-            Intent i = new Intent(this.getActivity(), CropActivity.class);
-            startActivity(i);
-        }
     }
 
     /*private String imgDecodableString;
@@ -582,20 +487,93 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
         }
     }*/
 
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+
+        capturedImageUri = Uri.fromFile(image);
+        return image;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Bitmap b = null;
+
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+            // Bundle extras = data.getExtras();
+            //Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+            Log.d("hipcook", "request take photo");
+            try {
+                b = MediaStore.Images.Media.getBitmap(getActivity().getApplicationContext().getContentResolver(), capturedImageUri);
+                Log.d("hipcook", "I now have a photo bitmap:" + b.getWidth());
+                float scaleFactor = 640f / b.getWidth();
+                b = DM.createScaledBitmap(b, scaleFactor);
+                Log.d("hipcook", "I now have a scaled photo bitmap:" + b.getWidth());
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d("hipcook", "bitmap exception");
+            }
+        } else if (requestCode == REQUEST_PICK_IMAGE &&
+                resultCode == Activity.RESULT_OK &&
+                null != data) {
+            // Get the Image from data
+
+            Uri selectedImage = data.getData();
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+            // Get the cursor
+            Cursor cursor = getActivity().getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+            cursor.moveToNext();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            imgDecodableString = cursor.getString(columnIndex);
+            cursor.close();
+
+            b = DM.decodeSampledBitmapFromFile(imgDecodableString, 640, 640);
+            Log.d("hipcook", "I now have a bitmap:" + b.getWidth());
+
+
+        } else {
+            Toast.makeText(this.getActivity(), "You haven't picked Image", Toast.LENGTH_LONG).show();
+        }
+
+        //if found a bitmap do the crop fun
+        if (b != null) {
+            CropActivity.del = this;
+            bitmapToCrop = b;
+            Intent i = new Intent(this.getActivity(), CropActivity.class);
+            startActivity(i);
+        }
+    }
+
     @Override
     public void didCropBitmap(final Bitmap b) {
         // imageView.setImageBitmap(b);
 
-        if(albums.size() == 0)
-        {
-            Toast.makeText(this.getActivity(),"No albums loaded yet",Toast.LENGTH_LONG).show();
+        if (albums.size() == 0) {
+            Toast.makeText(this.getActivity(), "No albums loaded yet", Toast.LENGTH_LONG).show();
             return;
         }
 
         AlertDialog.Builder d = new AlertDialog.Builder(this.getActivity());
         d.setTitle("Upload Image To Folder?");
 
-        View v = this.getActivity().getLayoutInflater().inflate(R.layout.uploadphoto_dialog,null);
+        View v = this.getActivity().getLayoutInflater().inflate(R.layout.uploadphoto_dialog, null);
 
         ImageView iv = v.findViewById(R.id.imageView);
         iv.setImageBitmap(b);
@@ -605,10 +583,9 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
         picker.setMaxValue(albums.size() - 1);
         picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //stops editing...
         String[] sa = new String[albums.size()];
-        for(int i=0; i<albums.size(); i++)
-        {
+        for (int i = 0; i < albums.size(); i++) {
             sa[i] = albums.get(i).name;
-            Log.d("hq","album id:"+albums.get(i).mediaAlbumId);
+            Log.d("hq", "album id:" + albums.get(i).mediaAlbumId);
         }
         picker.setDisplayedValues(sa);
 
@@ -617,7 +594,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 int index = picker.getValue();
-                uploadBitmap(b,albums.get(index).mediaAlbumId);
+                uploadBitmap(b, albums.get(index).mediaAlbumId);
             }
         });
         d.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -630,12 +607,11 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
     }
 
-    private void uploadBitmap(final Bitmap bitmap, int albumID)
-    {
+    private void uploadBitmap(final Bitmap bitmap, int albumID) {
         final ProgressDialog pd = DM.getPD(this.getActivity(), "Uploading Image...");
         pd.show();
 
-        Log.d("hq","uploading bitmap to server, albumID="+albumID);
+        Log.d("hq", "uploading bitmap to server, albumID=" + albumID);
         String fileName = "photo.png";
 
         File f = new File(this.getContext().getCacheDir(), fileName);
@@ -655,12 +631,12 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
 
             TypedFile typedImage = new TypedFile("application/octet-stream", f);
-            Log.d("HQ","Uploading image "+typedImage.file().length());
+            Log.d("HQ", "Uploading image " + typedImage.file().length());
 
             DM.getApi().postImageToAlbum(DM.getAuthString(), albumID, typedImage, new Callback<Response>() {
                 @Override
                 public void success(Response response, Response response2) {
-                    Toast.makeText(getActivity(),"Imaged posted to album",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Imaged posted to album", Toast.LENGTH_LONG).show();
                     loadData();
                     pd.hide();
 
@@ -668,7 +644,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
                 @Override
                 public void failure(RetrofitError error) {
-                    Toast.makeText(getActivity(),"Imaged posting failed: "+error.getMessage(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Imaged posting failed: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     pd.hide();
                 }
             });
@@ -676,62 +652,81 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d("hq","file exception");
+            Log.d("hq", "file exception");
             pd.hide();
         }
 
 
-
     }
 
-    private Bitmap bitmapToCrop;
     @Override
     public Bitmap getInputBitmap() {
         return bitmapToCrop;
     }
 
-
-    private boolean initialLoaded = false;
-    public void loadIfUnloaded(){
-        if(initialLoaded == false) loadData();
+    public void loadIfUnloaded() {
+        if (initialLoaded == false) loadData();
     }
-    private void loadData()
-    {
+
+    private void loadData() {
         initialLoaded = true;
 
-        final ProgressDialog pd = DM.getPD(this.getActivity(),"Loading Media Albums...");
+        final ProgressDialog pd = DM.getPD(this.getActivity(), "Loading Media Albums...");
         pd.show();
 
 
-        if(group != null) DM.getApi().getGroupMediaAlbums(DM.getAuthString(), group.groupId, new Callback<List<MediaAlbum>>() {
-            @Override
-            public void success(List<MediaAlbum> mediaAlbums, Response response) {
-                albums = mediaAlbums;
-                for(MediaAlbum a : albums)
-                {
-                    a.sortMediaAlbumsByDate();
+        if (group != null)
+            /*DM.getApi().getGroupMediaAlbums(DM.getAuthString(), group.groupId, new Callback<List<MediaAlbum>>() {
+                @Override
+                public void success(List<MediaAlbum> mediaAlbums, Response response) {
+                    albums = mediaAlbums;
+                    for (MediaAlbum a : albums) {
+                        a.sortMediaAlbumsByDate();
+                    }
+
+                    listAdapter.notifyDataSetChanged();
+                    refreshLayout.setRefreshing(false);
+                    pd.dismiss();
+
+                    if (mediaAlbums.size() == 0) emptyIV.setVisibility(View.VISIBLE);
+                    else emptyIV.setVisibility(View.GONE);
+
                 }
 
-                listAdapter.notifyDataSetChanged();
-                refreshLayout.setRefreshing(false);
-                pd.dismiss();
+                @Override
+                public void failure(RetrofitError error) {
+                    pd.dismiss();
+                    refreshLayout.setRefreshing(false);
 
-                if(mediaAlbums.size()==0) emptyIV.setVisibility(View.VISIBLE);
-                else emptyIV.setVisibility(View.GONE);
+                }
+            });*/
 
-            }
+            DM.getApi().getGroupingMediaAlbums(DM.getAuthString(), group.groupId, new Callback<MediaAlbumResponse>() {
+                @Override
+                public void success(MediaAlbumResponse mediaAlbumResponse, Response response) {
+                    albums = mediaAlbumResponse.getData();
 
-            @Override
-            public void failure(RetrofitError error) {
-                pd.dismiss();
-                refreshLayout.setRefreshing(false);
+                    for (MediaAlbum a: albums){
+                        a.sortMediaAlbumsByDate();
+                    }
 
-            }
-        });
+                    listAdapter.notifyDataSetChanged();
+                    refreshLayout.setRefreshing(false);
+                    pd.dismiss();
+
+                    if (mediaAlbumResponse.getData().size() == 0) emptyIV.setVisibility(View.VISIBLE);
+                    else emptyIV.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+
+                }
+            });
     }
 
     private class RoundedCornersTransform implements Transformation {
-        public  Bitmap getRoundedCornerBitmap(Bitmap bitmap, float r, float v, float r1, float v1) {
+        public Bitmap getRoundedCornerBitmap(Bitmap bitmap, float r, float v, float r1, float v1) {
             Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                     bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(output);

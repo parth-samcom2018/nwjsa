@@ -342,9 +342,6 @@ public class MainTabbing extends BaseVC {
         });
     }
 
-
-
-
     @SuppressLint("ResourceAsColor")
     private void setUpIcon() {
 
