@@ -26,7 +26,7 @@ public class PDFVC extends AppCompatActivity {
 
         this.setTitle("PDF Viewer");
 
-        pdfView = (PDFView) findViewById(R.id.pdfview);
+        pdfView = findViewById(R.id.pdfview);
         pdfView.enableSwipe(true);
 
 

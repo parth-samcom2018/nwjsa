@@ -1,9 +1,11 @@
 package com.hq.nwjsahq;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,8 +14,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
@@ -25,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,6 +38,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.hq.nwjsahq.api.API;
 import com.hq.nwjsahq.models.Article;
 import com.hq.nwjsahq.models.Event;
@@ -45,6 +51,7 @@ import com.hq.nwjsahq.views.TextPoster;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
@@ -567,6 +574,10 @@ public class NoticeboardFragment extends Fragment {
             public void failure(RetrofitError error) {
                 refreshLayout.setRefreshing(false);
                 pd.dismiss();
+
+                if(error.getResponse().getStatus()>=400 && error.getResponse().getStatus() < 599){
+                    showAlert();
+                }
             }
         };
 
@@ -611,6 +622,56 @@ public class NoticeboardFragment extends Fragment {
         });
     }
 
+    private void showAlert() {
+        final Dialog dialog = new Dialog(NoticeboardFragment.this.getActivity());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.custom_dialogbox_logout);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        Button dialogBtn_done = dialog.findViewById(R.id.btn_dialog);
+        dialogBtn_done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logoutAction();
+                dialog.dismiss();
+            }
+        });
+
+
+        dialog.show();
+    }
+
+    private void logoutAction() {
+
+        DM.member = null;
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(NoticeboardFragment.this.getActivity());
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove("HQUsername");
+        editor.remove("HQToken");
+        editor.apply();
+
+        unregisterForPush();
+
+        getActivity().finish();
+
+        Intent i = new Intent(NoticeboardFragment.this.getActivity(), Login.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+
+    }
+
+    private void unregisterForPush()
+    {
+        //TODO call api and unregister with device token
+
+        try {
+            FirebaseInstanceId.getInstance().deleteInstanceId();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private class RoundedCornersTransform implements Transformation {
 

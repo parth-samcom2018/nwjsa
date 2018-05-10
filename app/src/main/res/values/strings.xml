@@ -54,7 +54,7 @@
     <string name="fullsite"><u>View Full Site</u></string>
     <string name="forgot"><u>Forgot?</u></string>
     <string name="error_password">Enter Password</string>
-
+    <string name="alert_msg">Authorisation is denied..!!</string>
     <string name="title_activity_maps">Map</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
