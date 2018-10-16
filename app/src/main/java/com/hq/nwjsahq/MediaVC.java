@@ -329,7 +329,7 @@ public class MediaVC extends Fragment implements CropActivity.CropProtocol {
                 pd = DM.getPD(MediaVC.this.getActivity(), "Loading Creating Album..");
                 pd.show();
 
-                DM.getApi().postMediaAlbum(DM.getAuthString(), name, group.groupId, new Callback<Response>() {
+                DM.getApi().postMediaAlbum(DM.getAuthString(), name, group.groupId, "", new Callback<Response>() {
                     @Override
                     public void success(Response response, Response response2) {
                         Toast.makeText(MediaVC.this.getActivity(), "Album Created!", Toast.LENGTH_LONG).show();

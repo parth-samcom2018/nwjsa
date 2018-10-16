@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/grid_cell_height_extra_large"
+    android:clickable="true"
+    android:padding="10dp">
+
+    <com.daimajia.slider.library.SliderLayout
+        android:id="@+id/slider"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/grid_cell_height_extra_large"
+        android:visibility="gone" />
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relativelayout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/grid_cell_height_extra_large"
+        android:background="@android:color/transparent"
+        android:padding="5dp">
+
+
+        <ProgressBar
+            android:id="@+id/progressBar_media"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:elevation="5dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/colorPrimary"
+            android:indeterminateTintMode="src_atop"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_media"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progressBar_media"
+            android:layout_centerInParent="true"
+            android:elevation="5dp"
+            android:gravity="center"
+            android:text="Sports Club HQ"
+            android:textColor="@color/colorPrimary"
+            android:visibility="visible" />
+
+
+        <ImageView
+            android:id="@+id/iv"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/grid_cell_height_extra_large"
+            android:adjustViewBounds="true"
+            android:background="@drawable/textshape"
+            android:clickable="true"
+            android:scaleType="fitXY"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/firstTV"
+            style="@style/textview_normal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/lato_regular"
+            android:gravity="center|left"
+            android:lines="2"
+            android:minLines="2"
+            android:text="Rugby National Now I have A really long adn big name"
+            android:textStyle="bold" />
+
+
+    </RelativeLayout>
+
+
+    <Button
+        android:id="@+id/flagButton"
+        android:layout_width="@dimen/flag_button_width"
+        android:layout_height="@dimen/flag_button_width"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/flag"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>

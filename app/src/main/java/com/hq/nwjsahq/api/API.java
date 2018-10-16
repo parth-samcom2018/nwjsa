@@ -25,6 +25,7 @@ import java.util.List;
 import retrofit.Callback;
 import retrofit.client.Response;
 import retrofit.http.Body;
+import retrofit.http.DELETE;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
@@ -46,22 +47,20 @@ public interface API {
                       @Field("password") String password,
                       Callback<Token> callback);
 
-    //new api v2
-    @POST("/apiv2/account/register")
-    public void register(@Header("Authorization") String auth,
-                         @Body Register registerModel,
-                         Callback<Response> callback);
-
-
     @FormUrlEncoded
     @POST("/apiv2/account/forgotpassword")
     public void forgetPassword(@Header("Authorization") String auth,
                                @Field("email") String email,
                                Callback<Response> callback);
 
+    @POST("/apiv2/account/register")
+    public void register(@Header("Authorization") String auth,
+                         @Body Register registerModel,
+                         Callback<Response> callback);
+
     @FormUrlEncoded
     @POST("/apiv2/account/changepassword")
-    public void postNewPassword(@Header("Authorization")String auth,
+    public void postNewPassword(@Header("Authorization") String auth,
                                 @Field("oldPassword") String oldPassword,
                                 @Field("newPassword") String newPassword,
                                 @Field("confirmPassword") String confirmPassword,
@@ -86,29 +85,17 @@ public interface API {
                           Callback<Response> callback);
 
     @GET("/apiv2/account/memberdetails")
-    public void getMemberDetailing(@Header("Authorization") String auth,
-                                   Callback<Profile> callback);
+    public void getMemberDetailing(@Header("Authorization") String auth, Callback<Profile> callback);
 
-    //older api
-    @GET("/api/Articles/{articleID}")
-    public void getArticle(@Header("Authorization") String auth,
-                           @Path("articleID") int articleID,
-                           Callback<Article> response);
-
-    //older version
     @GET("/apiv2/events/all")      //here is the other url part.best way is to start using /
-    public void getAllEvents(@Header("Authorization") String auth, Callback<EventResponse> response);
+    public void getAllEventings(@Header("Authorization") String auth, Callback<EventResponse> response);
+
+    @GET("/apiv2/events/group/{groupID}")
+    public void getFixtureGroup(@Header("Authorization") String auth,@Path("groupID") int groupID, Callback<EventResponse> response);
 
     @GET("/apiv2/groupmembers/all")
     void getClubNames(Callback<ClubResponse> callback);
 
-
-    @POST("/apiv2/events/save")
-    public void postEvent(@Header("Authorization") String auth,
-                          @Body Event eventModel,
-                          Callback<Response> callback);
-
-    //new
     @POST("/apiv2/events/save")
     public void postEvents(@Header("Authorization") String auth,
                            @Body Event eventModel,
@@ -119,17 +106,18 @@ public interface API {
                           @Body Event eventModel,
                           Callback<Response> callback);
 
+    //older api version 1
+    @GET("/api/groupMembers/groups")      //here is the other url part.best way is to start using /
+    public void getAllGroups(@Header("Authorization") String auth, Callback<List<Group>> response);
+
+
     //new api v2
-    @GET("/apiv2/groupMembers/groups")      //here is the other url part.best way is to start using /
+    @GET("/apiv2/groupMembers/groups")
+    //here is the other url part.best way is to start using /
     public void getAllGrouping(@Header("Authorization") String auth, Callback<GroupResponse> response);
 
-    //new api v2
-    @GET("/apiv2/events/all")      //here is the other url part.best way is to start using /
-    public void getAllEventings(@Header("Authorization") String auth, Callback<EventResponse> response);
-
-    //older api
-    @GET("/api/events/{eventID}")
-    public void getEvent(@Header("Authorization") String auth,@Path("eventID") int eventID, Callback<Event> response);
+    @GET("/apiv2/events/{eventID}")
+    public void getEvent(@Header("Authorization") String auth, @Path("eventID") int eventID, Callback<Event> response);
 
     @FormUrlEncoded
     @POST("/apiv2/events/comment")
@@ -137,6 +125,13 @@ public interface API {
                                   @Field("EventId") int eventID,
                                   @Field("Comment") String comment,
                                   Callback<Response> callback);
+
+    /*@FormUrlEncoded
+    @POST("/api/media/album")
+    public void postMediaAlbum(@Header("Authorization") String auth,
+                               @Field("name") String name,
+                               @Field("groupid") int groupID,
+                               Callback<Response> callback);*/
 
     //new api v2
     @GET("/apiv2/articles/get/{groupID}")
@@ -152,18 +147,10 @@ public interface API {
     @FormUrlEncoded
     @POST("/apiv2/articles/Comment/{groupID}/{articleID}")
     public void postArticleComments(@Header("Authorization") String auth,
-                                    @Path("groupID") int  groupID,
+                                    @Path("groupID") int groupID,
                                     @Path("articleID") int articleID,
                                     @Field("ArticleCommentDescription") String comment,
                                     Callback<ArticleComment> callback);
-
-
-    @FormUrlEncoded
-    @POST("/apiv2/media/album")
-    public void postMediaAlbum(@Header("Authorization") String auth,
-                               @Field("name") String name,
-                               @Field("groupid") int groupID,
-                               Callback<Response> callback);
 
     @FormUrlEncoded
     @POST("/apiv2/groupmembers/invite")
@@ -174,20 +161,17 @@ public interface API {
                                 @Field("GroupId") int groupID,
                                 Callback<Response> callback);
 
-    @GET("/apiv2/ladders/14")
-    public void getLadders(@Header("Authorization") String auth, Callback<LaddersResponse> response);
-
     //older
     @POST("/api/folder/Create")
     public void postFolder(@Header("Authorization") String auth,
                            @Body Folder registerModel,
                            Callback<Response> callback);
+    //older api
+    @GET("/apiv2/Articles/{articleID}")
+    public void getArticle(@Header("Authorization") String auth,
+                           @Path("articleID") int articleID,
+                           Callback<Article> response);
 
-    //new api v2
-    @POST("/apiv2/folder/Create")
-    public void postFolders(@Header("Authorization") String auth,
-                            @Body Folder registerModel,
-                            Callback<Response> callback);
 
     @POST("/apiv2/notifications/add")
     public void postNotifications(@Header("Authorization") String auth,
@@ -219,7 +203,7 @@ public interface API {
     @FormUrlEncoded
     @POST("/apiv2/media/Comment")
     public void postMediaComments(@Header("Authorization") String auth,
-                                  @Field("MediaId") int  mediaID,
+                                  @Field("MediaId") int mediaID,
                                   @Field("Comment") String comment,
                                   Callback<Response> callback);
 
@@ -247,24 +231,30 @@ public interface API {
                                   Callback<Response> response);
 
     //older api
-    @GET("/api/media/get/{groupID}")
-    public void getGroupMediaAlbums(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<List<MediaAlbum>> response);
-
+    /*@GET("/api/media/get/{groupID}")
+    public void getGroupMediaAlbums(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<List<MediaAlbum>> response);*/
 
     //new api v2
     @GET("/apiv2/media/get/{groupID}")
     public void getGroupingMediaAlbums(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<MediaAlbumResponse> response);
+
+
+    @GET("/apiv2/video/get/{groupID}")
+    public void getGroupingVideoAlbum(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<MediaAlbumResponse> response);
+
+    @GET("/apiv2/ladders/14")
+    public void getLadders(@Header("Authorization") String auth, Callback<LaddersResponse> response);
+
 
     //new api v2
     @GET("/apiv2/document/get/{groupID}")
     public void getGroupFoldersnew(@Header("Authorization") String auth, @Path("groupID") int groupID, Callback<GroupFoldersRes> response);
 
     //older
-    @PUT("/apiv2/folder/Update")
-    public void putFolders(@Header("Authorization") String auth,
-                           @Body Folder registerModel,
-                           Callback<Response> callback);
-
+    @PUT("/api/folder/Update")
+    public void putFolder(@Header("Authorization") String auth,
+                          @Body Folder registerModel,
+                          Callback<Response> callback);
 
     //new api v2
     @GET("/apiv2/notifications/all")      //here is the other url part.best way is to start using /
@@ -277,4 +267,58 @@ public interface API {
     public void postProfileImage(@Header("Authorization") String auth,
                                  @Part("image") TypedFile file,
                                  Callback<Response> response);
+
+    @DELETE("/apiv2/notifications/delete/{notificationId}")
+    public void notificationDelete(@Header("Authorization") String auth,
+                                   @Path("notificationId") int notificationID,
+                                   Callback<Response> callback);
+
+    @DELETE("/apiv2/notifications/comment/delete/{notificationCommentId}")
+    public void CommentsDelete(@Header("Authorization") String auth,
+                               @Path("notificationCommentId") int notificationCommentId,
+                               Callback<Response> callback);
+
+    @FormUrlEncoded
+    @POST("/apiv2/media/postvideo")
+    public void postVideoToAlbum(@Header("Authorization") String auth,
+                                 @Field("mediaAlbumId") int mediaAlbumID,
+                                 @Field("videourl") String url,
+                                 Callback<Response> callback);
+
+    @FormUrlEncoded
+    @POST("/apiv2/media/album")
+    public void postMediaAlbum(@Header("Authorization") String auth,
+                               @Field("name") String name,
+                               @Field("groupid") int groupID,
+                               @Field("albumtype") String type,
+                               Callback<Response> callback);
+
+    @FormUrlEncoded
+    @POST("/apiv2/media/album")
+    public void postVideoAlbum(@Header("Authorization") String auth,
+                               @Field("name") String name,
+                               @Field("groupid") int groupID,
+                               @Field("albumtype") String type,
+                               Callback<Response> callback);
+
+    @DELETE("/apiv2/media/comment/delete/{mediacommentid}")
+    public void mediaCommentdelete(@Header("Authorization") String auth,
+                                   @Path("mediacommentid") int mediacommentid,
+                                   Callback<Response> callback);
+
+    @GET("/apiv2/video/album/{mediaAlbumId}")
+    public void getVideoAlbum(@Header("Authorization") String auth, @Path("mediaAlbumId") int mediaAlbumID, Callback<MediaAlbum> response);
+
+    @DELETE("/apiv2/media/delete/{MediaId}")
+    public void deleteMediaItem(@Header("Authorization") String auth,
+                                @Path("MediaId") int mediaID,
+                                Callback<Response> callback);
+
+    @GET("/apiv2/video/album/{id}")
+    public void getMediaModelRes(@Header("Authorization") String auth, @Path("id") int mediaAlbumID,  Callback<MediaAlbumResponse> response);
+
+    @DELETE("/apiv2/events/comment/delete/{eventcommentID}")
+    public void eventCommentDelete(@Header("Authorization") String auth,
+                                   @Path("eventcommentID") int eventcommentID,
+                                   Callback<Response> callback);
 }

@@ -1,15 +1,20 @@
 package com.hq.nwjsahq;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,7 +35,7 @@ public class EventCommentsVC extends Fragment {
     private ArrayAdapter<Event> listAdapter;
     private SwipeRefreshLayout refreshLayout;
     private TextPoster textPoster;
-
+    Dialog dialog;
 
     //MODELS
     public Event event;
@@ -146,7 +151,70 @@ public class EventCommentsVC extends Fragment {
                         //.fetch();
                         .into(userIV);
 
+                convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        dialog = new Dialog(getActivity());
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setCancelable(true);
+                        dialog.setContentView(R.layout.my_details_event);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
+                        TextView tvdata = dialog.findViewById(R.id.tvData);
+
+                        tvdata.setText("" + ec.comment);
+
+                        Log.d("event","memberID:" + DM.member.memberId);
+                        Log.d("event","eventmemberID:" + ec.memberId);
+                        Log.d("event","eventcommentID:" + ec.eventCommentId);
+
+
+
+                        Button btn_no = dialog.findViewById(R.id.btn_no);
+                        btn_no.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        Button btnYes = dialog.findViewById(R.id.btn_yes);
+
+                        btnYes.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                if (DM.member.memberId == ec.memberId) {
+                                    String auth = DM.getAuthString();
+
+                                    DM.getApi().eventCommentDelete(auth, ec.eventCommentId, new Callback<Response>() {
+                                        @Override
+                                        public void success(Response response, Response response2) {
+                                            Toast.makeText(getActivity(), "Delete Comments", Toast.LENGTH_SHORT).show();
+                                            refreshEvent();
+                                            refreshLayout.setRefreshing(true);
+                                        }
+
+                                        @Override
+                                        public void failure(RetrofitError error) {
+                                            Toast.makeText(getActivity(), "Cannot delete this comment", Toast.LENGTH_SHORT).show();
+                                            refreshEvent();
+                                            refreshLayout.setRefreshing(true);
+                                        }
+                                    });
+                                }
+                                else {
+                                    Toast.makeText(getActivity(), "You are authorized to delete this comments!!", Toast.LENGTH_SHORT).show();
+                                }
+
+
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                        return true;
+                    }
+                });
 
                 return convertView;
             }

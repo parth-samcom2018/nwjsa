@@ -35,7 +35,7 @@ public class EventsFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private ArrayAdapter<Event> listAdapter;
     private SwipeRefreshLayout refreshLayout;
     private ImageView emptyIV;
-
+    private TextView tvMsg;
     public static boolean oneShotRefresh = false;
 
 
@@ -80,7 +80,7 @@ public class EventsFragment extends Fragment implements SwipeRefreshLayout.OnRef
         View v = inflater.inflate(R.layout.fragment_events, container, false);
 
         emptyIV = v.findViewById(R.id.empty);
-
+        tvMsg = v.findViewById(R.id.tvMessage);
 
         listView = v.findViewById(R.id.list);
 
@@ -157,7 +157,7 @@ public class EventsFragment extends Fragment implements SwipeRefreshLayout.OnRef
         String auth = DM.getAuthString();
 
 
-        DM.getApi().getAllEvents(auth,new Callback<EventResponse>() {
+        DM.getApi().getAllEventings(auth,new Callback<EventResponse>() {
             @Override
             public void success(EventResponse events, Response response) {
 

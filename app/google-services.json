@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "462461669859",
+    "firebase_url": "https://nwjsa-ad199.firebaseio.com",
+    "project_id": "nwjsa-ad199",
+    "storage_bucket": "nwjsa-ad199.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462461669859:android:d9c00f6b8eb14817",
+        "android_client_info": {
+          "package_name": "com.hq.nwjsahq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "462461669859-ojbk6hajpqbui2jorhb6l2je2p112c75.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGNL7khPFqIVNmkKhaVEiTnSsoQO9I8SM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

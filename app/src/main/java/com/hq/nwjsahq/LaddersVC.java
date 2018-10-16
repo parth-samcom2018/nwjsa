@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.hq.nwjsahq.models.Group;
 import com.hq.nwjsahq.models.Ladders;
 import com.hq.nwjsahq.models.LaddersResponse;
 
@@ -29,6 +30,7 @@ import retrofit.client.Response;
 public class LaddersVC extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     Ladders ladder;
+    public Group group;
     private ListView listView;
     private ArrayAdapter<Ladders> listadapter;
     private SwipeRefreshLayout refreshLayout;

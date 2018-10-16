@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.Gson;
 import com.hq.nwjsahq.api.API;
 import com.hq.nwjsahq.models.Article;
 import com.hq.nwjsahq.models.Event;
@@ -62,6 +63,8 @@ import retrofit.client.Response;
 
 public class NoticeboardFragment extends Fragment {
 
+    private static final String TAG = "NWJSA";
+
     //MODEL
     public Group group; //OPTIONAL!
     private List<Notification> notifications = new Vector<Notification>();
@@ -74,6 +77,7 @@ public class NoticeboardFragment extends Fragment {
     private TextPoster textPoster;
     private ImageView emptyIV,userIV,iv;
     private Button flagButton;
+    Dialog dialog;
 
 
     public NoticeboardFragment() {
@@ -264,8 +268,55 @@ public class NoticeboardFragment extends Fragment {
 
                 final Notification n = notifications.get(position);
 
+                if (n.notificationTypeId == Notification.TYPE_VIDEO) {
+                    convertView = LayoutInflater.from(NoticeboardFragment.this.getContext()).inflate(R.layout.main_video_cell, parent, false);
+
+                    iv = convertView.findViewById(R.id.bodyIV);
+
+
+                    final TextView tv = convertView.findViewById(R.id.secondTV);
+                    tv.setText("has Added a Video");
+                    tv.setTextColor(Color.BLACK);
+                    //tv.setTextColor(Color.WHITE);
+
+
+                    //  iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    if (iv != null && n.thumbnailUrl != null) {
+
+                        Log.d("video", "thumbnail url:" + n.thumbnailUrl);
+                        //   Picasso.with(NoticeboardFragment.this.getContext()).load(n.thumbnailUrl).into(iv);
+
+
+                        Picasso.Builder builder = new Picasso.Builder(NoticeboardFragment.this.getContext());
+                        builder.listener(new Picasso.Listener() {
+                            @Override
+                            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                                Log.d("video", "uri: " + uri.getPath());
+                                exception.printStackTrace();
+                            }
+                        });
+
+                        try {
+                            Picasso p = builder.build();
+                            //p.load(n.thumbnailUrl).networkPolicy(NetworkPolicy.NO_CACHE).into(iv);
+                            //Picasso.with(getActivity()).load(n.thumbnailUrl).transform(new RoundedCornersTransform()).into(iv);
+                            p.load(n.thumbnailUrl).placeholder(R.drawable.logo_log_in).transform(new RoundedCornersTransform()).into(iv);
+                            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        } catch (IllegalArgumentException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    Button flagButton = convertView.findViewById(R.id.flagButton);
+                    flagButton.setOnClickListener(DM.getFlagOnClickListener(getActivity()));
+
+
+                }
+
                 //Text or image...
-                if (n.notificationTypeId == Notification.TYPE_MEDIA) {
+                else if (n.notificationTypeId == Notification.TYPE_MEDIA) {
                     convertView = LayoutInflater.from(NoticeboardFragment.this.getContext()).inflate(R.layout.main_image_cell, parent, false);
 
                     iv = convertView.findViewById(R.id.bodyIV);
@@ -327,6 +378,69 @@ public class NoticeboardFragment extends Fragment {
                             }
                         }
                     });
+
+
+                    convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View view) {
+
+                            dialog = new Dialog(getActivity());
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                            dialog.setCancelable(true);
+                            dialog.setContentView(R.layout.my_notifications);
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+                            Log.d(TAG, "memberID: " + DM.member.memberId);
+                            Log.d(TAG, "NotificationmemberID: " + n.memberId);
+
+
+                            Button btn_no = dialog.findViewById(R.id.btn_no);
+                            btn_no.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            Button btnYes = dialog.findViewById(R.id.btn_yes);
+
+                            btnYes.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    if (DM.member.memberId == n.memberId) {
+                                        String auth = DM.getAuthString();
+
+                                        DM.getApi().notificationDelete(auth, n.notificationId, new Callback<Response>() {
+                                            @Override
+                                            public void success(Response response, Response response2) {
+                                                Toast.makeText(getActivity(), "Delete Notification", Toast.LENGTH_SHORT).show();
+                                                loadData(true);
+                                                refreshLayout.setRefreshing(true);
+                                            }
+
+                                            @Override
+                                            public void failure(RetrofitError error) {
+                                                Toast.makeText(getActivity(), "Cannot", Toast.LENGTH_SHORT).show();
+                                                loadData(true);
+                                                refreshLayout.setRefreshing(true);
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        Toast.makeText(getActivity(), "You are authorized to delete this notification!!", Toast.LENGTH_SHORT).show();
+                                    }
+
+
+                                    dialog.dismiss();
+                                }
+                            });
+                            dialog.show();
+
+
+                            return true;
+                        }
+                    });
                 }
 
                 TextView firstTV = convertView.findViewById(R.id.firstTV);
@@ -367,6 +481,35 @@ public class NoticeboardFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
+                        if (n.notificationTypeId == Notification.TYPE_VIDEO) {
+                            final ProgressDialog pd = DM.getPD(getActivity(), "Loading Video...");
+                            pd.show();
+                            DM.getApi().getVideoAlbum(DM.getAuthString(), n.notificationItemId, new Callback<MediaAlbum>() {
+                                @Override
+                                public void success(MediaAlbum mediaAlbum, Response response) {
+
+                                    pd.dismiss();
+                                    /*MediaDetailVC.mediaAlbum = mediaAlbum;
+                                    MediaDetailVC.selectedMediaId = n.mediaId; //can be null
+
+                                    Intent i = new Intent(NoticeBoardVCN.this.getActivity(), MediaDetailVC.class);
+                                    startActivity(i);*/
+
+                                    VideoDetailVC.mediaAlbum = mediaAlbum;
+                                    VideoDetailVC.selectedMediaId = n.mediaId;
+                                    Intent i = new Intent(getActivity(), VideoDetailVC.class);
+                                    startActivity(i);
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+
+                                    pd.dismiss();
+                                    Toast.makeText(getActivity(), "Could not load media, try later", Toast.LENGTH_LONG).show();
+
+                                }
+                            });
+                        }
 
                         if (n.notificationTypeId == Notification.TYPE_NOTIFICATION) {
 
@@ -506,6 +649,74 @@ public class NoticeboardFragment extends Fragment {
                     }
                 });
 
+                convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        dialog = new Dialog(getActivity());
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setCancelable(true);
+                        dialog.setContentView(R.layout.my_notifications);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+                        /*TextView tvdata = dialog.findViewById(R.id.tvData);
+
+                        tvdata.setText("" + n.comments);*/
+
+                        /*Log.d(TAG, "notification created: " + n.notificationId);
+                        Log.d(TAG, "notification id: " + n.familyId);
+                        Log.d(TAG, "NotificationitemID: " + n.notificationItemId);
+                        Log.d(TAG, "NotificationtypeID: " + n.notificationTypeId);*/
+                        Log.d(TAG, "memberID: " + DM.member.memberId);
+                        Log.d(TAG, "NotificationmemberID: " + n.memberId);
+
+
+                        Button btn_no = dialog.findViewById(R.id.btn_no);
+                        btn_no.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        Button btnYes = dialog.findViewById(R.id.btn_yes);
+
+                        btnYes.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                if (DM.member.memberId == n.memberId) {
+                                    String auth = DM.getAuthString();
+
+                                    DM.getApi().notificationDelete(auth, n.notificationId, new Callback<Response>() {
+                                        @Override
+                                        public void success(Response response, Response response2) {
+                                            Toast.makeText(getActivity(), "Delete Notification", Toast.LENGTH_SHORT).show();
+                                            loadData(true);
+                                            refreshLayout.setRefreshing(true);
+                                        }
+
+                                        @Override
+                                        public void failure(RetrofitError error) {
+                                            Toast.makeText(getActivity(), "Cannot", Toast.LENGTH_SHORT).show();
+                                            loadData(true);
+                                            refreshLayout.setRefreshing(true);
+                                        }
+                                    });
+                                }
+                                else {
+                                    Toast.makeText(getActivity(), "You are authorized to delete this notification!!", Toast.LENGTH_SHORT).show();
+                                }
+
+
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+
+
+                        return true;
+                    }
+                });
 
                 return convertView;
             }
