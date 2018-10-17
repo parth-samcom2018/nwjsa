@@ -390,6 +390,7 @@ public class NoticeboardFragment extends Fragment {
                             dialog.setContentView(R.layout.my_notifications);
                             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
+
                             Log.d(TAG, "memberID: " + DM.member.memberId);
                             Log.d(TAG, "NotificationmemberID: " + n.memberId);
 
@@ -658,14 +659,7 @@ public class NoticeboardFragment extends Fragment {
                         dialog.setContentView(R.layout.my_notifications);
                         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
-                        /*TextView tvdata = dialog.findViewById(R.id.tvData);
 
-                        tvdata.setText("" + n.comments);*/
-
-                        /*Log.d(TAG, "notification created: " + n.notificationId);
-                        Log.d(TAG, "notification id: " + n.familyId);
-                        Log.d(TAG, "NotificationitemID: " + n.notificationItemId);
-                        Log.d(TAG, "NotificationtypeID: " + n.notificationTypeId);*/
                         Log.d(TAG, "memberID: " + DM.member.memberId);
                         Log.d(TAG, "NotificationmemberID: " + n.memberId);
 

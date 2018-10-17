@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -36,7 +35,6 @@ import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.daimajia.slider.library.Tricks.ViewPagerEx;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hq.nwjsahq.models.Event;
@@ -52,7 +50,7 @@ import retrofit.client.Response;
 
 public class VideoDetailVC extends BaseVC {
 
-    private static final String TAG = "GHFA";
+    private static final String TAG = "QLD";
     public static MediaAlbum mediaAlbum;
     //public static VideoAlbum mediaAlbum;
     public static int selectedMediaId;
@@ -248,7 +246,7 @@ public class VideoDetailVC extends BaseVC {
         secondTV = findViewById(R.id.secondTV);
         imageView = findViewById(R.id.imageView);
 
-        /* videoView = findViewById(R.id.videoview_details);*/
+        /*videoView = (VideoView) findViewById(R.id.videoview_details);*/
 
 
         slider = findViewById(R.id.slider);
@@ -267,7 +265,7 @@ public class VideoDetailVC extends BaseVC {
             public void onPageSelected(int position) {
 
                 selectedMedia = mediaAlbum.mediaModels.get(position);
-                Log.d("videodetails", "on page selected changed media!!! : " + selectedMedia.url.toString());
+                Log.d("videodetails", "on page selected changed media!!! : " + selectedMedia.url);
                 listAdapter.notifyDataSetChanged();
             }
 
@@ -343,59 +341,16 @@ public class VideoDetailVC extends BaseVC {
 
             textSliderView.setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
                 @Override
-                public void onSliderClick(BaseSliderView slider) {
-                    Log.d("slider", "video" + selectedMedia.url);
-                    Log.d("response", "onsuccess : " + selectedMedia.thumbnail);
-                    Log.d("response", "onsuccess : " + mediaAlbum.thumbnail);
-                    Log.d("response", "onsuccess : " + mediaAlbum.url);
-                    Log.d("response", "onsuccess : " + mediaAlbum.name);
-                    Log.d("response", "onsuccess : " + videoref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Log.d("response", "onsuccess" + uri);
-                        }
-                    }));
-                    /*AlertDialog.Builder b = new AlertDialog.Builder(VideoDetailVC.this);
-
-                    View v = getLayoutInflater().inflate(R.layout.video_dialog, null);
-                    //ImageViewTouch iv = v.findViewById(R.id.imageView);
-                    final VideoView videoView = v.findViewById(R.id.video);
-
-                    String fullScreen = getIntent().getStringExtra("fullScreenInd");
-                    if ("y".equals(fullScreen)) {
-                        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                        getSupportActionBar().hide();
-                    }
-
-                    Uri videoUri = Uri.parse("https://firebasestorage.googleapis.com/v0/b/baseball-qld.appspot.com/o/Videos%2F121%2F1539587499.mp4?alt=media&token=5b5a754f-f0ef-48b2-93ba-4fdb4db8fd1a");
-
-                    videoView.setVideoURI(videoUri);
-
-                    mediaController = new FullScreenMediaController(VideoDetailVC.this);
-                    mediaController.setAnchorView(videoView);
-
-                    videoView.setMediaController(mediaController);
-                    videoView.start();
-
-
-                    b.setView(v);
-                    b.show();*/
+                public void onSliderClick(BaseSliderView sliders) {
 
                     Intent i = new Intent(VideoDetailVC.this, FullScreen.class);
-                    i.putExtra("url", selectedMedia.getUrl);
+                    i.putExtra("url", selectedMedia.url);
                     startActivity(i);
-
-                    /*String fullScreen =  getIntent().getStringExtra("fullScreenInd");
-                    if("y".equals(fullScreen)){
-                        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                        getSupportActionBar().hide();
-                    }*/
-
 
                 }
             });
+
+
             slider.addSlider(textSliderView);
         }
 
@@ -439,6 +394,8 @@ public class VideoDetailVC extends BaseVC {
         listAdapter.notifyDataSetChanged();
 
     }
+
+
 
 
     private void postComment(String text) {
