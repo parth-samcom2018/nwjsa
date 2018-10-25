@@ -157,7 +157,13 @@ public class MainTabbing extends BaseVC {
                             tv_left.setVisibility(View.GONE);
                             frmL.setVisibility(View.GONE);
                             mTitle.setText("Groups");
-                            //ll_edit.setVisibility(View.GONE);
+                            /*tvend.setText("+ Groups");
+                            tvend.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    newGroupAction();
+                                }
+                            });*/
                             groupsVC.loadIfUnloaded();
                         }
                         catch (NullPointerException e){
@@ -169,17 +175,17 @@ public class MainTabbing extends BaseVC {
                     case 2:
 
                         try{
-                            tvend.setVisibility(View.VISIBLE);
+                            tvend.setVisibility(View.GONE);
                             tv_left.setVisibility(View.GONE);
                             frmL.setVisibility(View.GONE);
                             mTitle.setText("Events");
-                            tvend.setText("CREATE");
+                            /*tvend.setText("+ Events");
                             tvend.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     newEventAction();
                                 }
-                            });
+                            });*/
                             eventsVC.loadIfUnloaded();
                             break;
                         }
